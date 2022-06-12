@@ -100,16 +100,16 @@ Simply returns the created, updated, deleted or requested user:
 
 # Installation
 
-### Clone the [Flask EC2 Deployment repo](https://github.com/twyle/flask-ec2-deployment)
+### Clone the [Flask Linode Deployment repo](https://github.com/twyle/flask-linode-deployment)
 
 ```sh
-git clone https://github.com/twyle/flask-ec2-deployment.git
+git clone https://github.com/twyle/flask-linode-deployment.git
 ```
 
 ### Navigate into the cloned repo
 
 ```sh
-cd flask-ec2-deployment
+cd flask-linode-deployment
 ```
 
 ### Create a Python3 Virtual Environment.
@@ -225,7 +225,7 @@ Distributed under the MIT license. See ``LICENSE`` for more information.
 
 ## Contributing
 
-1. Fork it https://github.com/twyle/flask-ec2-deployment/fork
+1. Fork it https://github.com/twyle/flask-linode-deployment/fork
 2. Create your feature branch (`git checkout -b feature/fooBar`)
 3. Commit your changes (`git commit -am 'Add some fooBar'`)
 4. Push to the branch (`git push origin feature/fooBar`)
