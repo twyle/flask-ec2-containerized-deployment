@@ -1,4 +1,4 @@
-# flask-ec2-deployment
+# Flask Linode Deployment
 > This is a simple flask application that shows how to deploy a production grade application to Linode.
 
 [![Feature Development Build](https://github.com/twyle/flask-ec2-deployment/actions/workflows/feature-development-workflow.yml/badge.svg)](https://github.com/twyle/flask-ec2-deployment/actions/workflows/feature-development-workflow.yml)
