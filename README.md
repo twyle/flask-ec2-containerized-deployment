@@ -23,9 +23,9 @@ This project shows how to lauch a production grade application to AWS EC2. It is
 - ***A User Creation System.***
 - ***Uses the PostgresQL Database to store both users as well as authentication and authorization information.***
 - ***A logging system that logs to file and sends emails on critical errors.***
-- ***It is deployed to an AWS EC2 instance with gunicorn server and nginx as a proxy.***
+- ***It is deployed to a Linode instance with gunicorn server and nginx as a proxy.***
 
-If you want to learn more about how it was developed, read ***[How to Deploy a Production Grade Flask application to a Linode Server Instance using GitHub Actions](https://medium.com/@lyle-okoth/how-to-deploy-a-production-grade-flask-application-to-an-aws-ec2-instance-using-github-actions-6241886b197)***. The are atleast five branches associated with the application:
+There are atleast five branches associated with the application:
 
 - **Features** - Used to create new features
 - **Development** - Where all the newly developed features are showcased
