@@ -14,7 +14,7 @@
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
 ![Gunicorn](https://img.shields.io/badge/gunicorn-%298729.svg?style=for-the-badge&logo=gunicorn&logoColor=white)
 
-![](flask-ec2-cover.png)
+![](flask-linode.jpg)
 
 
 This project shows how to lauch a production grade application to AWS EC2. It is a simple flask application, with the following features:
