@@ -153,3 +153,63 @@ jobs:
         sleep 10
         curl http://127.0.0.1:5000/home
         curl http://127.0.0.1:5000/users
+
+  DeployDev:
+
+    name: Deploy to Dev
+
+    needs: [Test-Local]
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: Development
+
+    steps:
+
+      - name: Deploy
+        run: echo I am deploying the api to AWS
+
+      - name: Deploy to linode
+        env:
+          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
+          HOST_NAME : ${{ secrets.HOST_NAME  }}
+          USER_NAME : ${{ secrets.USER_NAME  }}
+          USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
+          APP_DIR: ${{secrets.APP_DIR}}
+          SERVICE_NAME: ${{secrets.SERVICE_NAME}}
+
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} "
+            cd ${APP_DIR} &&
+            git pull &&
+            echo ${USER_PASSWORD} | sudo -S systemctl restart ${SERVICE_NAME} "
+
+      - name: Deploy to Linode
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.HOST_IP}}
+          username: ${{secrets.USER_NAME}}
+          password: ${{secrets.USER_PASSWORD}}
+          script: |
+            cd ${{secrets.APP_DIR}}
+            git pull
+            echo ${{secrets.USER_PASSWORD}} | sudo -S systemctl restart ${{secrets.SERVICE_NAME}}
+
+  Test-Remote:
+
+    name: Test Remote Deployment
+
+    needs: [DeployDev]
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: Development
+
+    steps:
+    - name: Test application
+      run: |
+        sleep 5
+        curl ${{ secrets.HOST_IP  }} | grep "template api"
