@@ -6,6 +6,7 @@ import sys
 from dotenv import load_dotenv
 from flask import Flask
 
+from .blueprints.auth.views import auth
 from .blueprints.default.views import default
 from .blueprints.extensions import db
 from .error_handlers import handle_bad_request
@@ -22,6 +23,7 @@ if not are_environment_variables_set():
 
 app = Flask(__name__)
 app.register_blueprint(default)
+app.register_blueprint(auth)
 
 set_flask_environment(app)
 

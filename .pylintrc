@@ -154,6 +154,7 @@ disable=print-statement,
         arguments-differ,
         no-member,
         import-error,
+        logging-fstring-interpolation,
 
 
 # Enable the message, report, category or checker with the given id(s). You can
