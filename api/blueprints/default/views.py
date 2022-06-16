@@ -2,7 +2,7 @@
 """This module contains the routes associated with the default Blueprint."""
 from json import JSONDecodeError
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, redirect, request, url_for
 
 from .helpers import handle_create_user, handle_delete_user, handle_get_user, handle_update_user
 from .models import User
@@ -12,6 +12,13 @@ default = Blueprint('default', __name__, template_folder='templates', static_fol
 
 @default.route('/', methods=['GET'])
 def default_route():
+    """Confirm that the application is working."""
+    return redirect(url_for('auth.register')), 302
+
+
+@default.route('/home', methods=['GET'])
+@default.route('/index', methods=['GET'])
+def home():
     """Confirm that the application is working."""
     return jsonify({'hello': 'from template api'}), 200
 
