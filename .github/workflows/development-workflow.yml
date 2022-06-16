@@ -168,23 +168,7 @@ jobs:
     steps:
 
       - name: Deploy
-        run: echo I am deploying the api to AWS
-
-      - name: Deploy to linode
-        env:
-          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
-          HOST_NAME : ${{ secrets.HOST_NAME  }}
-          USER_NAME : ${{ secrets.USER_NAME  }}
-          USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
-          APP_DIR: ${{secrets.APP_DIR}}
-          SERVICE_NAME: ${{secrets.SERVICE_NAME}}
-
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} "
-            cd ${APP_DIR} &&
-            git pull &&
-            echo ${USER_PASSWORD} | sudo -S systemctl restart ${SERVICE_NAME} "
+        run: echo I am deploying the api to Linode
 
       - name: Deploy to Linode
         uses: appleboy/ssh-action@master
