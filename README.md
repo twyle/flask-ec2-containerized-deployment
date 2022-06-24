@@ -15,36 +15,13 @@
 ![Gunicorn](https://img.shields.io/badge/gunicorn-%298729.svg?style=for-the-badge&logo=gunicorn&logoColor=white)
 
 ![](flask-linode.jpg)
+## Introduction
 
+The API itself is a simple flask application that enables an admnistrator to register. Upon logging in, they are issued with an access token that allows them to create a new user.
 
-This project shows how to lauch a production grade application to AWS EC2. It is a simple flask application, with the following features:
-- ***A User Registration System.***
-- ***A User Authentication and Authorization System.***
-- ***A User Creation System.***
-- ***Uses the PostgresQL Database to store both users as well as authentication and authorization information.***
-- ***A logging system that logs to file and sends emails on critical errors.***
-- ***It is deployed to a Linode instance with gunicorn server and nginx as a proxy.***
+## Application routes
 
-There are atleast five branches associated with the application:
-
-- **Features** - Used to create new features
-- **Development** - Where all the newly developed features are showcased
-- **Staging** - Used to test out the nwely developed features before being moved to production
-- **Release** - Holds all the code and assets related to the latest release
-- **Production** - Holds all the code that is currentlyin production.
-
-**The application development workflow. **
-
-- A new feature branch is created, to host the code for the new feature.
-- When this is pushed to GitHub, it triggers a workflow that does code quality checks as well as run unit tests, then tests that the application does run.
-- When the feature branch is merged into the development branch, the same code quality checks are run. In addition , the code is pushed to the development server and then the application is restarted with the changes.
-- The development branch is merged into the staging branch, following the same workflow, but the code is autodeployed to a staging server.
-- When a tag is pushed to GitHub, the staging branch is merged into the Release branch and a release is created.
-- When the rellease branch is merged into the production branch, the code is pushed to the production server and the production application restarted with the changes.
-
-**The application routes.** 
-
-The API has nine routes.
+This interaction with the application happens overthe following routes:
 
 | Route       | Method      | Description      |
 | ----------- | ----------- |----------------- |
@@ -54,166 +31,218 @@ The API has nine routes.
 | '/user'     | PUT         | Update a single user's data by supplying the user ID and email address |
 | '/user'     | DELETE      | Delete a single user by supplying the users ID |
 | '/users'    | GET         | Get the list of all created users |
-| '/auth/register'     | POST         | Register a new user. |
-| '/auth/login'     | POST         | Login a registered user to get an access token. |
-| '/auth/me'     | GET         | Get a logged in user's data. |
+| '/auth/register'     | POST         | Register a new admin. |
+| '/auth/login'     | POST         | Login a registered admin to get an access token. |
+| '/auth/me'     | GET         | Get a logged in admins data. |
+| '/auth/me'     | PUT         | Update a logged in admins data. |
+| '/auth/me'     | DELETE      | Delete a logged in admins data. |
+| '/auth/admins'     | GET         | Get all logged in admins data. |
 
-**The default (/) route :**
+## Application Features
 
-Simply returns a JSON response:
+The application has the following features:
 
-```json
-{
-  "hello": "from the template api!"
-}
-```
+- Secret management with Hashicorp's Vault.
+- Logging with AWS Firehose and AWS Open Search
+- Authorizaton using Json Web Tokens
+- Database Management using PostgreSQL
+- Email sending using Amazon SES
+- Documentation with mkdocs and swagger
+- GitHub Actions to run tests and code quality checks
 
-**The /users route :**
+## Application Development Workflow
 
-Simply returns a JSON response:
+During the development, atleast five branches were used:
+- Features branch used when developing new features. This is then merged into the development branch, only if all the steps present in the feature development workflow pass.
+- Development branch that hosts the development code. All the features that are actively being built are found in this branch. It is later merged into the staging branch, only if all the steps specified in the development workflow pass.
+- Staging branch that holds the code that is to be merged into production.
+- Release branch that holds all the items and artifacts that are used when creating a new release.
+- Production branch that holds the code that is currently deployed.
 
-```json
-[
-  {
-    "active": true, 
-    "email": "test@example.com", 
-    "id": 1
-  }, 
-  {
-    "active": true, 
-    "email": "test1@example.com", 
-    "id": 2
-  }
-]
-```
-**The /user route :**
+## Application setup
 
-Simply returns the created, updated, deleted or requested user:
+### Vault Setup
 
-```json
-{
-    "active": true, 
-    "email": "test@example.com", 
-    "id": 1
- }
-```
-
-# Installation
-
-### Clone the [Flask Linode Deployment repo](https://github.com/twyle/flask-linode-deployment)
+To test out the application, first check out the code frm the development branch
 
 ```sh
-git clone https://github.com/twyle/flask-linode-deployment.git
+git clone https://github.com/twyle/api-template-v4.git
 ```
 
-### Navigate into the cloned repo
+#### Navigate into the cloned repo
 
 ```sh
-cd flask-linode-deployment
+cd api-template-v4
 ```
 
-### Create a Python3 Virtual Environment.
-
-OS X & Linux:
+#### Start the Vault server
 
 ```sh
-python3 -m venv venv
+make start-vault
 ```
 
-### Activate the Virtual Environment.
-
-OS X & Linux:
+#### Get a bash shell on the running vault container
 
 ```sh
-source venv/bin/activate
+make vault-bash
 ```
 
-### Install the Project dependencies.
+#### Initialize Vault
+
+Within the bash session
 
 ```sh
-make update
-make install
-make install-dev
+vault operator init
 ```
 
-### Initialize pre-commit.
+This gives you the 5 unseal keys and the root token. Store these safely.
+
+
+![](vault-init.png)
+
+#### Unseal vault
+
+Within the bash session, run this command three times, ech time supplying a different unseal key.
 
 ```sh
-make pre-commit 
+vault operator unseal
 ```
 
-### Initialize pre-commit.
+![](vault-unsealed.png)
+
+#### Log into Vault
+
+Within the bash session
 
 ```sh
-make initial-tag
+vault login
 ```
 
-### Create the PostgresQL database
+### Secret Creation
 
-Call it lyle_dev or whichever name you want
+After initializing and unsealing vault, you can now create secrets. To create key value pairs, you will need to enable the kv engine
 
-### Create the project secrets
+#### Enable the kv engine
+
+At the bash session:
 
 ```sh
-touch .env
+vault secrets enable kv
 ```
-Then add the following to the file:
 
-```sh
+#### Write a secret at the bash session
+
+For the application to work, we need the following secrest:
+
 - FLASK_APP=api/__init__.py
 - FLASK_ENV=development
 - SECRET_KEY=supersecretkey
-
-- POSTGRES_HOST=db 
+- POSTGRES_HOST=<YOUR-IP-ADDRESS>
 - POSTGRES_DB=lyle
-- POSTGRES_PORT=5432
+- POSTGRES_PORT=5434
 - POSTGRES_USER=postgres
 - POSTGRES_PASSWORD=lyle
-```
-### Create the database tables and seed data
+- MAIL_HOST=<YOUR-MAIL-HOST>
+- MAIL_PORT=<YOUR-MAIL-PORT>
+- MAIL_USERNAME=<YOUR-USER-NAME>
+- MAIL_PASSWORD=<YOUR-PASSWORD>
+- FIREHOSE_DELIVERY_STREAM=flask-logging-firehose-stream
+
+To create these secrets, the format used is:
+
+ ```sh
+ vault kv put kv/<project-name>/<environment>/<secret_name> SECRET_NAME=value i.e
+ vault kv put kv/api-template-v4/local/flask_environment FLASK_ENV=development
+ ```
+
+Follow that format for all the secrets.
 
 ```sh
-make create_db
-make seed_db
+vault kv put kv/api-template-v4/local/flask_environment FLASK_ENV=development
+vault kv put kv/api-template-v4/local/flask_app FLASK_APP=api/__init__.py
 ```
 
-### Run the application
+### Database Setup
+
+#### Start the database container
+
+To set up the PostgreSQL Database, on a different terminal
+
+```sh
+make start-db-containers
+```
+
+#### Create the database tables
+
+```sh
+make create-db
+```
+
+#### Insert a couple of records
+```sh
+make seed-db
+```
+
+### Start the application
+
+Finally, start the application
+
 ```sh
 make run
 ```
+## Application Use
 
-### Test the application
+Then navigate to http://localhost:5000/apidocs, you will get
 
-```sh
-make test-local
-```
+![](api-docs.png)
+ 
+### Create a new Admin User
+ 
+To be able to use the application, first create an admin user by scrolling down to the Authentication section and selecting the button next to auth/register.
 
-# Release History
+![](api-register-admin.png)
+ 
+Then click the Try it out button
+ 
+![](api-register-admin-try-it-out.png)
+ 
+Enter an email, username and password. Then finally click the execute button
 
-## v0.3.0 (2022-06-02)
+![](api-create-admin-execute.png)
+ 
+You should have created an admin.
 
-### Feat
+### Log into the Admin
 
-- added the templates.
+Loging in the admin gives you an access token that enables you to create new users. Again within the Authentication section, select the button next to /auth/login.
 
-## v0.2.0 (2022-06-02)
+![](api-log-admin.png) 
 
-### Feat
+Again click on the try it out button
+ 
+![](api-log-admin-try.png)
+ 
+Then use the credentials that you registered with to log in:
 
-- implemented user data storage.
+![](api-login-pass.png)
+ 
+You should get back an access and refresh token
+ 
+![](api-access-token.png)
+ 
+Copy the access token, you will need it to authenticate your requests. Then at the top of the page, select the Authorize button:
 
-## v0.1.0 (2022-06-02)
+![](api-authorize-button.png)
 
-### Feat
+In the resulting field, enter the word Bearer then paste the access token i.e
 
-- created the authentication workflow.
-
-## v0.0.1 (2022-06-02)
-
-### Fix
-
-- fixed the linting errors.
-- fixed isort.
+ ```sh
+ Bearer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ ```
+ 
+![](api-authorize.png)
+ 
+You now have the authority to create new users or access any route in the application.
 
 ## Meta
 
