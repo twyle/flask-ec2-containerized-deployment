@@ -48,13 +48,13 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f ./services/web/requirements.txt ]; then pip install -r ./services/web/requirements.txt; fi
 
     - name: Run the flake8 linter
       run: flake8
 
     - name: Run the pylint linter
-      run: pylint --rcfile=.pylintrc api/
+      run: pylint --rcfile=.pylintrc ./services/web/api/
 
     # - name: Run the mypy linter
     #   run: mypy -p api
@@ -71,18 +71,25 @@ jobs:
         echo POSTGRES_USER=${{secrets.POSTGRES_USER}} >> .env
         echo POSTGRES_PASSWORD=${{secrets.POSTGRES_PASSWORD}} >> .env
 
+        echo MAIL_HOST=${{secrets.MAIL_HOST}} >> .env
+        echo MAIL_PORT=${{secrets.MAIL_PORT}} >> .env
+        echo MAIL_USERNAME=${{secrets.MAIL_USERNAME}} >> .env
+        echo MAIL_PASSWORD=${{secrets.MAIL_PASSWORD}} >> .env
+
+        echo FIREHOSE_DELIVERY_STREAM=${{secrets.FIREHOSE_DELIVERY_STREAM}} >> .env
+
     - name: Create the test tables
       run: |
-        python manage.py create_db
+        python ./services/web/manage.py create_db
 
     - name: Test with pytest
       run: |
-        if [ -d tests ] || [ -d test ]; then python -m pytest; fi
+        if [ -d ./services/web/tests ] || [ -d ./services/web/test ]; then python -m pytest; fi
 
     - name: Pytest Coverage
       run: |
-        if [ -d tests ] || [ -d test ]; then coverage run -m pytest; fi
-        if [ -d tests ] || [ -d test ]; then coverage report -m; fi
+        if [ -d ./services/web/tests ] || [ -d ./services/web/test ]; then coverage run -m pytest; fi
+        if [ -d ./services/web/tests ] || [ -d ./services/web/test ]; then coverage report -m; fi
 
     - name: Coverage Report
       run: coverage xml
@@ -127,8 +134,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f ./services/web/requirements-dev.txt ]; then pip install -r ./services/web/requirements-dev.txt; fi
+        if [ -f ./services/web/requirements.txt ]; then pip install -r ./services/web/requirements.txt; fi
 
     - name: Create the Environment variables
       run: |
@@ -142,58 +149,21 @@ jobs:
         echo POSTGRES_USER=${{secrets.POSTGRES_USER}} >> .env
         echo POSTGRES_PASSWORD=${{secrets.POSTGRES_PASSWORD}} >> .env
 
+        echo MAIL_HOST=${{secrets.MAIL_HOST}} >> .env
+        echo MAIL_PORT=${{secrets.MAIL_PORT}} >> .env
+        echo MAIL_USERNAME=${{secrets.MAIL_USERNAME}} >> .env
+        echo MAIL_PASSWORD=${{secrets.MAIL_PASSWORD}} >> .env
+
+        echo FIREHOSE_DELIVERY_STREAM=${{secrets.FIREHOSE_DELIVERY_STREAM}} >> .env
+
     - name: Create the development tables
       run: |
-        python manage.py create_db
+        python ./services/web/manage.py create_db
 
     - name: Test application
       run: |
-        python manage.py seed_db
-        python manage.py run &
+        python ./services/web/manage.py seed_db
+        python ./services/web/manage.py run &
         sleep 10
-        curl http://127.0.0.1:5000/home
+        curl http://127.0.0.1:5000/
         curl http://127.0.0.1:5000/users
-
-  DeployDev:
-
-    name: Deploy to Dev
-
-    needs: [Test-Local]
-
-    runs-on: ubuntu-latest
-
-    environment:
-      name: Development
-
-    steps:
-
-      - name: Deploy
-        run: echo I am deploying the api to Linode
-
-      - name: Deploy to Linode
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{secrets.HOST_IP}}
-          username: ${{secrets.USER_NAME}}
-          password: ${{secrets.USER_PASSWORD}}
-          script: |
-            cd ${{secrets.APP_DIR}}
-            git pull
-            echo ${{secrets.USER_PASSWORD}} | sudo -S systemctl restart ${{secrets.SERVICE_NAME}}
-
-  Test-Remote:
-
-    name: Test Remote Deployment
-
-    needs: [DeployDev]
-
-    runs-on: ubuntu-latest
-
-    environment:
-      name: Development
-
-    steps:
-    - name: Test application
-      run: |
-        sleep 5
-        curl ${{secrets.HOST_IP}}/home | grep "template api"

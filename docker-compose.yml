@@ -1,33 +1,11 @@
-version: '3'
+version: '3.7'
 
 services:
-  test_db:
-    image: postgres
-    container_name: test_db_1
-    restart: always
-    environment:
-      POSTGRES_HOST: localhost
-      POSTGRES_DB: lyle
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: lyle
+  web:
+    build:
+      context: ./services/web
+      dockerfile: Dockerfile
     ports:
-      - 5435:5432
-
-  dev_db:
-    image: postgres
-    container_name: dev_db_1
-    restart: always
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    environment:
-      POSTGRES_HOST: localhost
-      POSTGRES_DB: lyle
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: lyle
-    ports:
-      - 5436:5432
-
-volumes:
-  postgres_data:
+      - 5000:5000
+    env_file:
+      - ./services/web/.env
