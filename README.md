@@ -1,5 +1,5 @@
-# Flask Linode Deployment
-> This is a simple flask application that shows how to deploy a production grade application to Linode.
+# Flask AWS Containerized Deployment
+> This is a simple flask application that shows how to deploy a containerized production grade application to AWS.
 
 [![Feature Development Build](https://github.com/twyle/flask-ec2-deployment/actions/workflows/feature-development-workflow.yml/badge.svg)](https://github.com/twyle/flask-ec2-deployment/actions/workflows/feature-development-workflow.yml)
 [![Development Build](https://github.com/twyle/flask-ec2-deployment/actions/workflows/development-workflow.yml/badge.svg)](https://github.com/twyle/flask-ec2-deployment/actions/workflows/development-workflow.yml)
@@ -49,6 +49,7 @@ The application has the following features:
 - Email sending using Amazon SES
 - Documentation with mkdocs and swagger
 - GitHub Actions to run tests and code quality checks
+- Deployed using traefik and gunicorn with a custom domain name
 
 ## Application Development Workflow
 
@@ -63,16 +64,16 @@ During the development, atleast five branches were used:
 
 ### Vault Setup
 
-To test out the application, first check out the code frm the development branch
+To test out the application, first check out the code from the development branch
 
 ```sh
-git clone https://github.com/twyle/api-template-v4.git
+git clone https://github.com/twyle/flask-ec2-containerized-deployment.git
 ```
 
 #### Navigate into the cloned repo
 
 ```sh
-cd api-template-v4
+cd flask-ec2-containerized-deployment
 ```
 
 #### Start the Vault server
@@ -152,14 +153,14 @@ To create these secrets, the format used is:
 
  ```sh
  vault kv put kv/<project-name>/<environment>/<secret_name> SECRET_NAME=value i.e
- vault kv put kv/api-template-v4/local/flask_environment FLASK_ENV=development
+ vault kv put kv/flask-ec2-containerized-deployment/local/flask_environment FLASK_ENV=development
  ```
 
 Follow that format for all the secrets.
 
 ```sh
-vault kv put kv/api-template-v4/local/flask_environment FLASK_ENV=development
-vault kv put kv/api-template-v4/local/flask_app FLASK_APP=api/__init__.py
+vault kv put kv/flask-ec2-containerized-deployment/local/flask_environment FLASK_ENV=development
+vault kv put kv/flask-ec2-containerized-deployment/flask_app FLASK_APP=api/__init__.py
 ```
 
 ### Database Setup
