@@ -28,6 +28,12 @@ start-db-containers:
 stop-db-containers:
 	@sudo docker compose -f services/database/database-compose.yml down -v
 
+start-services-container:
+	@sudo docker compose -f services-compose.yml up --build -d
+
+stop-services-container:
+	@sudo docker compose -f services-compose.yml down -v
+
 start-vault:
 	@sudo docker compose -f services/secrets/vault-compose.yml up --build -d
 
@@ -43,5 +49,8 @@ seed-db:
 test-local:
 	@curl localhost:5000/
 	@curl localhost:5000/users
+
+start-application:
+	@sudo docker compose up --build
 
 all: update install install-dev pre-commit initial-tag start-db-containers create-db test seed-db run
