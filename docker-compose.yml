@@ -5,7 +5,19 @@ services:
     build:
       context: ./services/web
       dockerfile: Dockerfile
-    ports:
-      - 5000:5000
+    expose:  # new
+      - 5000
     env_file:
       - ./services/web/.env
+    labels:  # new
+      - "traefik.enable=true"
+      - "traefik.http.routers.flask.rule=Host(`flask.localhost`)"
+
+  traefik:  # new
+    image: traefik:v2.2
+    ports:
+      - 80:80
+      - 8081:8080
+    volumes:
+      - "./services/traefik/traefik.dev.toml:/etc/traefik/traefik.toml"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
