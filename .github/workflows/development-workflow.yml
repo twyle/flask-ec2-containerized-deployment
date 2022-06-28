@@ -202,7 +202,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} "
             cd ${APP_DIR} &&
             git pull &&
-            echo ${USER_PASSWORD} | sudo -S docker-compose up --build -d "
+            echo ${USER_PASSWORD} | sudo -S docker-compose down -v && docker-compose up --build -d "
 
   Test-Remote:
     name: Test Remote Deployment
