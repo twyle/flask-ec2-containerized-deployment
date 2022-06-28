@@ -18,7 +18,7 @@ services:
   traefik:  # new
     build:
       context: ./services/traefik
-      dockerfile: Dockerfile.traefik
+      dockerfile: Dockerfile
     ports:
       - 80:80
       - 443:443
